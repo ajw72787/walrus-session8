@@ -59,3 +59,11 @@ The Phase 0 API surface adds the following checks for local development:
 
 - Replaced the age vocabulary with `young`, `adult`, `older`, and `unknown`; the 29 human characters are assigned as 7 young, 20 adult, and 2 older, while all non-human characters remain unknown.
 - Removed only Ava's and Kai's caps, with matching derived traits and artwork descriptions updated.
+
+---
+
+## Phase 1B — Deterministic Game Engine
+
+- Added deterministic, allowlisted structured-question evaluation over the frozen canonical dataset; no LLM participates in game truth.
+- Added immutable game-state transitions for questions and guesses, including safe failures after completion and for invalid inputs.
+- Added Node-native automated engine tests and an AI-free command-line demo using a known secret character.

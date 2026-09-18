@@ -49,6 +49,20 @@ The browser communicates only with the Next.js server; Ollama remains server-sid
 
 Run `npm run validate:data` to check roster integrity and `npm run analyze:data` to review deduction-trait distributions.
 
+## Deterministic game truth
+
+```
+Natural language (future)
+  ↓
+structured question
+  ↓
+deterministic game engine
+  ↓
+canonical characters.json
+```
+
+The future LLM may translate player language into structured questions, but the TypeScript engine alone evaluates truth, chooses and protects the secret character, eliminates candidates, and resolves guesses.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
