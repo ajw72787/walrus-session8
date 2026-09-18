@@ -41,7 +41,7 @@ Ollama
 Qwen 2.5 3B
 ```
 
-The browser communicates only with the Next.js server; Ollama remains server-side. Walrus Memory integration will be added in a later phase.
+The browser communicates only with the Next.js server; Ollama remains server-side.
 
 ## Canonical character data
 
@@ -69,9 +69,13 @@ The future LLM may translate player language into structured questions, but the 
 
 The frozen Phase 2A adversarial evaluation reached 144/154 (93.5%). Safety-sensitive categories were 100% safe-rejected where appropriate; remaining misses are conservative `OTHER` results rather than game-state mutations.
 
+## Phase 3A Walrus Memory connectivity
+
+MemWal 0.1.7 is integrated server-side only. A manual mainnet run verified authenticated `remember()` writes, indexed recall, returned blob IDs, and bidirectional isolation for the fixed Aaron and Leo namespaces. This only establishes connectivity; gameplay is not yet writing meaningful player memories.
+
 ## Phase 1C playable board
 
-The homepage now provides a responsive, playable placeholder board using the deterministic engine entirely in the browser. It has structured developer question controls, canonical-data placeholder cards, question history, guessing, and development-only secret controls. Character portraits are placeholders; Qwen natural-language gameplay and Walrus Memory integration come in later phases.
+The homepage now provides a responsive, playable placeholder board using the deterministic engine entirely in the browser. It has structured developer question controls, canonical-data placeholder cards, question history, guessing, and development-only secret controls. Character portraits are placeholders; gameplay-memory integration comes in a later phase.
 
 ## Deploy on Vercel
 

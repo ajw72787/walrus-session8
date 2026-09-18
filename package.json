@@ -14,10 +14,13 @@
     "test:intent": "node --experimental-strip-types --test src/lib/game/intent.test.ts",
     "test:intent-action": "node --experimental-strip-types --test src/lib/game/intent-action.test.ts",
     "test:grounding": "node --experimental-strip-types --test src/lib/game/interpreter-grounding.test.ts",
+    "test:memory": "node --experimental-strip-types --test src/lib/memory/players.test.ts",
+    "test:memwal:live": "node --experimental-strip-types scripts/test-memwal-connectivity.ts",
     "eval:interpreter": "node --experimental-strip-types scripts/eval-interpreter.ts",
     "demo:game": "node --experimental-strip-types scripts/demo-game.ts"
   },
   "dependencies": {
+    "@mysten-incubation/memwal": "^0.1.7",
     "next": "16.3.5",
     "react": "19.2.8",
     "react-dom": "19.2.8"

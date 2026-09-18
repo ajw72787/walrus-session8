@@ -102,6 +102,24 @@ The Phase 0 API surface adds the following checks for local development:
 - Safety-sensitive categories all reached 100%: negation, off-topic, meta/cheating, gibberish, ambiguous, and prompt injection. Roster-name and character-guess categories also reached 100%.
 - The earlier manual bugs are retained as regression evidence: “what is your favorite color?” previously mutated the board and “is yours not an animal?” previously became positive `isAnimal`; both now reject as `OTHER` without state mutation.
 
+---
+
+## Phase 3A — Walrus Memory Mainnet Connectivity Only
+
+- Installed `@mysten-incubation/memwal` version 0.1.7 for the normal `MemWal` client.
+- Configured the production managed relayer default: `https://relayer.memory.walrus.xyz`.
+- Defined server-side, fixed player namespaces: `whoamai:player_aaron`, `whoamai:player_leo`, and `whoamai:player_henry`; arbitrary player IDs are rejected by deterministic unit tests.
+- Added a gated live mainnet script that checks relayer health, performs authenticated Aaron and Leo `remember()` writes, waits for indexing, verifies exact-marker recall, and checks isolation in both directions. It is not run without configured credentials and never logs credentials.
+
+### Complete manual mainnet connectivity run — PASS
+
+- **Network:** mainnet. Relayer health: PASS.
+- **Authenticated Aaron write:** PASS in namespace `whoamai:player_aaron`; job `79a808b0-a79d-4e13-8d5d-ad0688127158`; blob `NHG-IyhVZKZuOJnQNQRwPw9PU2msVdwsLu2kdcaetEo`.
+- **Authenticated Leo write:** PASS in namespace `whoamai:player_leo`; job `e9ad8ca5-f05f-4d72-adb4-8e3964ee6cf2`; blob `vZBMLOyMTYI4g-u0BDxp2FHLqlDqLzI0SnC53cit1QU`.
+- **Recall:** Aaron recall PASS; Leo recall PASS.
+- **Namespace isolation:** Aaron → Leo PASS; Leo → Aaron PASS. Exact foreign marker text was not returned across the fixed player namespaces.
+- **Overall:** PASS. Phase 3A is complete: server-side MemWal mainnet connectivity, authenticated writes, indexed recall, returned blob IDs, and bidirectional per-player namespace isolation have been verified. This does not add gameplay-memory writes.
+
 ### Manual browser integration bug — game ID initialization
 
 - **Observed:** `crypto.randomUUID is not a function`
@@ -109,3 +127,16 @@ The Phase 0 API surface adds the following checks for local development:
 - **Expected:** `createGame()` initializes a valid game with a `gameId`.
 - **Actual:** Client-side initialization crashes before the playable board can load.
 - **Resolution:** Added an environment-safe game-ID helper. It uses `crypto.randomUUID()` when available, then `getRandomValues()` when available, and otherwise a timestamp plus `Math.random()` fallback. IDs are local session labels only and are not used for security-sensitive purposes. Added a regression test with `randomUUID` unavailable.
+
+### Possible mainnet Seal/RPC rate-limit friction — needs reproduction
+
+- **Recorded:** 2026-09-18T15:57:26-04:00.
+- **Environment:** `@mysten-incubation/memwal` 0.1.7; Node.js v24.16.0; Linux 6.8.0-124-generic x86_64; production managed mainnet relayer; target namespace `whoamai:player_aaron`.
+- **Operation attempted:** authenticated `MemWal.remember()` during `npm run test:memwal:live`, after relayer health succeeded.
+- **Expected:** `remember()` accepts the test record, returns a job that can be waited on for indexing, and eventually yields a blob ID.
+- **Actual:** `remember job failed: Internal Error: seal encrypt failed: seal/encrypt failed during read_account_identity: RpcError: Too Many Requests (traceId=34c89d99-f697-44df-b85e-c2878ca9c9da, timeoutMs=25000)`.
+- **Earlier successful context:** an authenticated Aaron write had completed earlier in this phase (job `fffe2317-f87f-4afe-ae82-e1588e401ebd`, blob `K9PO0EcxVvF_qgGDH8-x4brqawFWHNpuUzNkOKUDmrw`). This establishes that authenticated mainnet writing had worked before the observed failure.
+- **Local SDK inspection:** the installed SDK contains no `read_account_identity` implementation or string match. Its polling helper treats HTTP 429/5xx errors while polling as transient, but a remembered job already marked `failed` is surfaced immediately; there is no discovered automatic retry of that failed Seal-encryption job. The connectivity script only sets a 120-second job-wait timeout and does not suppress or alter SDK retry behavior.
+- **Timeout note:** the reported `timeoutMs=25000` is not the script's 120-second wait timeout and was not found as a local SDK default for this `remember()` path. It appears to be reported by the relayer/Seal/upstream RPC path, but the source cannot be determined from local inspection alone.
+- **Classification:** POSSIBLE Walrus/Seal/RPC rate-limit friction item, not a confirmed SDK bug. Observed once manually; needs reproduction before filing externally.
+- **Subsequent outcome:** a later unchanged manual `npm run test:memwal:live` run completed successfully: relayer health, Aaron and Leo authenticated writes, both recalls, and bidirectional isolation all passed. The original rate-limit evidence is retained; it currently appears transient and remains not a confirmed bug.
