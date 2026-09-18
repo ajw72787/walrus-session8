@@ -18,6 +18,9 @@
     "test:player": "node --experimental-strip-types --test src/lib/memory/player-auth.test.ts",
     "test:game-memory": "node --experimental-strip-types --test src/lib/memory/game-memory.test.ts",
     "test:player-profile": "node --experimental-strip-types --test src/lib/memory/player-profile.test.ts",
+    "test:art": "node --experimental-strip-types --test src/lib/game/character-art.test.ts src/lib/game/character-portrait.test.ts",
+    "validate:art": "node --experimental-strip-types scripts/validate-art.ts --assets",
+    "validate:art:manifest": "node --experimental-strip-types scripts/validate-art.ts",
     "test:memwal:live": "node --experimental-strip-types scripts/test-memwal-connectivity.ts",
     "eval:interpreter": "node --experimental-strip-types scripts/eval-interpreter.ts",
     "demo:game": "node --experimental-strip-types scripts/demo-game.ts"

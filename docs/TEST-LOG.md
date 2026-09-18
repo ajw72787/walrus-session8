@@ -213,3 +213,15 @@ The Phase 0 API surface adds the following checks for local development:
 - **Aaron, Memory OFF:** Build Player Profile returned “Memory is OFF — no Walrus recall or Qwen interpretation was requested.” This confirms OFF bypasses the personalization read path.
 - **Leo, Memory ON:** active profile `Leo` / `whoamai:player_leo`; Build Player Profile returned zero meaningful memories, zero completed games, `none` evidence, zero established observations, and zero proposed interpretations. Aaron's Tessa result did not appear, manually confirming browser-level profile isolation.
 - Phase 3D-A is complete. No new gameplay memories, mainnet writes, or live connectivity tests were created during validation.
+
+---
+
+## Phase 4A — Character Art System + Portrait Asset Pipeline (pre-production)
+
+- Added a derived 32-entry portrait manifest, shared original style prompt, per-character canonical prompt content, required visible traits, output paths, negative constraints, and explicit `missing_preproduction` status. It derives from frozen `characters.json`; the data remains authoritative over art.
+- Added `docs/CHARACTER-ART.md`: style bible, safe-area/framing rules, 32-character readability matrix, collision mitigations, generation/review workflow, acceptance checklist, responsive guidance, and intentional pre-production validation behavior.
+- Added `npm run validate:art:manifest`, which validates the manifest contract without requiring assets. Added `npm run validate:art`, which requires all final images to be valid square PNGs at least 512×512 and is intentionally expected to fail until real portraits are accepted.
+- Updated cards to use each canonical image path with `object-contain`, accessible alt text, and a labeled development fallback on image failure; no image assets were created. Added a development-only `/dev/characters` gallery for full-board art review.
+- Art collision priorities before generation: explorers (Kai/Ulric), gamers (Isla/Quinn), helmet wearers (Dax/Jace/Sam), purple fantasy characters (Cora/Tessa), glasses group, food-uniform group, older gray-bearded pair, dogs, and sports group. The specification assigns silhouette, prop, clothing, and expression differentiation without altering gameplay attributes.
+- No final portrait generation, downloads, gameplay-memory operations, Walrus calls, or roster changes occurred in this phase.
+- Local validation PASS: existing memory/player/game-memory/player-profile/game/UI-helper/intent/intent-action/grounding suites, new art tests (2), canonical data validation/analysis, art-manifest validation, lint, production build, and `git diff --check`. `validate:art` intentionally reported all 32 expected PNGs missing, which is the correct pre-production state.

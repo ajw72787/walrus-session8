@@ -1,18 +1,88 @@
 "use client";
+
 import { useMemo, useState, useSyncExternalStore } from "react";
+
 import { askQuestion, canonicalCharacters, createGame, guessCharacter, type DeductionQuestion, type GameState } from "@/lib/game/engine";
-import { humanizeValue, questionLabel } from "@/lib/game/question-label";
 import type { GameIntent } from "@/lib/game/intent";
+import { humanizeValue, questionLabel } from "@/lib/game/question-label";
+
+import { CharacterPortrait } from "./character-portrait";
 import { NaturalLanguagePanel } from "./natural-language-panel";
 
-function fresh(secret?: string): GameState { const result = createGame(secret); if (!result.ok) throw new Error(result.error); return result.value; }
-function icon(id: string) { const c = canonicalCharacters.find((x) => x.id === id)!; return c.species === "robot" ? "🤖" : c.species === "dog" ? "🐶" : c.name[0]; }
+function fresh(secret?: string): GameState {
+  const result = createGame(secret);
+  if (!result.ok) throw new Error(result.error);
+  return result.value;
+}
 
 export function PlayableGame({ onGameCompleted, memoryStatus }: { onGameCompleted?: (game: GameState) => void; memoryStatus?: string }) {
-  const [game, setGame] = useState<GameState>(() => fresh()); const [selected, setSelected] = useState<string | null>(null); const [feedback, setFeedback] = useState("Pick a card to guess, or ask a question."); const [debugSecret, setDebugSecret] = useState("random"); const [interpretation, setInterpretation] = useState(""); const development = process.env.NODE_ENV === "development"; const hydrated = useSyncExternalStore(() => () => {}, () => true, () => false); const selectedCharacter = useMemo(() => canonicalCharacters.find((c) => c.id === selected) ?? null, [selected]);
-  const start = (secret?: string) => { setGame(fresh(secret)); setSelected(null); setFeedback("Fresh board ready: 32 characters remaining."); };
-  const ask = (question: DeductionQuestion) => { const result = askQuestion(game, question); if (!result.ok) return setFeedback(result.error); setGame(result.value); const entry = result.value.questionsAsked.at(-1)!; setFeedback(`${entry.answer ? "YES" : "NO"}! ${entry.eliminatedCharacterIds.length} eliminated. ${result.value.remainingCharacterIds.length} remaining.`); };
-  const guess = (id: string) => { const result = guessCharacter(game, id); setSelected(null); if (!result.ok) return setFeedback(result.error); setGame(result.value); if (result.value.status === "won") { setFeedback(`YOU GOT IT! You found ${canonicalCharacters.find((c) => c.id === id)?.name}.`); onGameCompleted?.(result.value); } else setFeedback(`Not ${canonicalCharacters.find((c) => c.id === id)?.name}. Keep playing.`); };
-  const handleIntent = (intent: GameIntent) => { if (intent.type === "ATTRIBUTE_QUESTION") ask(intent.question); else if (intent.type === "CHARACTER_GUESS") guess(intent.characterId); else setFeedback("I didn't understand that one. Try asking about something you can see on the characters."); };
-  return <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#e0f2fe,_#f8fafc_45%,_#f5f3ff)] px-3 py-5 text-slate-900 sm:px-6 lg:px-8"><div className="mx-auto max-w-7xl"><header className="mb-6 flex flex-col gap-4 rounded-3xl bg-slate-950 px-5 py-6 text-white shadow-xl sm:flex-row sm:items-center sm:justify-between"><div><p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-300">Walrus Session 8 · Playable placeholder</p><h1 className="mt-1 text-4xl font-black">Who Am AI?</h1><p className="mt-1 text-slate-300">Ask questions. Narrow the board. Find my character.</p></div><button type="button" onClick={() => start()} className="min-h-12 rounded-xl bg-cyan-400 px-5 font-black text-slate-950">New Game</button></header><section aria-live="polite" className={`mb-6 rounded-3xl border p-5 ${game.status === "won" ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase text-slate-500">Current game</p><h2 className="text-2xl font-black">{game.status === "won" ? "🎉 You won!" : `${game.remainingCharacterIds.length} characters still in play`}</h2><p className="mt-1 text-slate-600">{feedback}</p>{game.status === "won" && memoryStatus && <p className="mt-2 font-bold text-cyan-800">{memoryStatus}</p>}</div><div className="rounded-2xl bg-slate-100 px-4 py-3 text-center"><span className="block text-2xl font-black">{game.questionCount}</span><span className="text-xs font-bold uppercase text-slate-500">Actions used</span></div></div></section><NaturalLanguagePanel disabled={game.status !== "active"} onIntent={handleIntent} onDebug={(input, intent) => setInterpretation(`${input} → ${JSON.stringify(intent)}`)} />{development && interpretation && <p className="mb-3 text-xs text-slate-500">Latest interpretation: {interpretation}</p>}<section aria-label="Character board" className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">{canonicalCharacters.map((character) => { const eliminated = game.eliminatedCharacterIds.includes(character.id); return <button key={character.id} type="button" disabled={eliminated || game.status !== "active"} onClick={() => setSelected(character.id)} aria-label={`Guess ${character.name}${eliminated ? ", eliminated" : ""}`} className={`relative min-h-40 rounded-2xl border p-3 text-left shadow-sm transition ${eliminated ? "rotate-1 border-slate-300 bg-slate-100 opacity-40 grayscale" : "border-slate-200 bg-white hover:-translate-y-1 hover:border-cyan-400"}`}><span className="absolute right-3 top-3 text-xs font-bold text-slate-400">{String(character.number).padStart(2, "0")}</span><span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 text-xl font-black">{icon(character.id)}</span><span className="block pr-6 text-base font-bold">{character.name}</span><span className="block text-xs font-semibold text-cyan-800">{humanizeValue(character.role)}</span><span className="mt-3 inline-flex rounded-full bg-slate-100 px-2 py-1 text-[11px]">{character.headwear.type !== "none" ? humanizeValue(character.headwear.type) : `${humanizeValue(character.hair.color)} hair`}</span>{eliminated && <span className="absolute inset-x-2 bottom-2 rounded-lg bg-slate-700 px-2 py-1 text-center text-xs font-bold text-white">ELIMINATED</span>}</button>; })}</section><div className="mt-6 grid gap-6 lg:grid-cols-2"><details className="rounded-3xl border border-violet-200 bg-violet-50 p-5"><summary className="cursor-pointer text-lg font-black">Developer Question Panel</summary><label className="mt-3 block text-sm font-bold">Question<select disabled={game.status !== "active"} className="mt-1 min-h-12 w-full rounded-xl border border-violet-200 bg-white px-3" onChange={(event) => ask({ kind: "boolean", field: event.target.value as Extract<DeductionQuestion, { kind: "boolean" }>["field"] })}>{["hasHair", "hasEyewear", "hasHeadwear", "hasFacialHair", "holdingItem", "wearingUniform", "isHuman", "isAnimal", "playsSport"].map((field) => <option key={field} value={field}>{humanizeValue(field)}</option>)}</select></label><p className="mt-2 text-xs text-slate-600">Selecting a question asks it deterministically.</p></details><section className="rounded-3xl border border-slate-200 bg-white p-5"><h2 className="text-lg font-black">Question history</h2>{game.questionsAsked.length ? <ol className="mt-3 space-y-2">{game.questionsAsked.map((entry, index) => <li key={index} className="text-sm">{index + 1}. {questionLabel(entry.question)} — <strong>{entry.answer ? "YES" : "NO"}</strong></li>)}</ol> : <p className="mt-2 text-sm text-slate-500">No questions yet.</p>}</section></div>{development && <section className="mt-6 rounded-3xl border border-amber-300 bg-amber-50 p-5"><p className="text-xs font-bold uppercase text-amber-800">Development only</p><p className="mt-1">Secret: <strong>{hydrated ? canonicalCharacters.find((c) => c.id === game.secretCharacterId)?.name : "Loading…"}</strong></p><label className="mt-3 block text-sm font-bold">Secret<select value={debugSecret} onChange={(event) => setDebugSecret(event.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-amber-300 bg-white px-3"><option value="random">Random</option>{canonicalCharacters.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label><button type="button" onClick={() => start(debugSecret === "random" ? undefined : debugSecret)} className="mt-3 min-h-11 rounded-xl bg-amber-400 px-4 font-bold">Start Debug Game</button></section>}{selectedCharacter && <div role="dialog" aria-modal="true" className="fixed inset-0 z-30 flex items-center justify-center bg-slate-950/45 p-4"><div className="w-full max-w-sm rounded-3xl bg-white p-6"><h2 className="text-2xl font-black">Guess {selectedCharacter.name}?</h2><div className="mt-5 flex gap-3"><button type="button" onClick={() => guess(selectedCharacter.id)} className="min-h-12 flex-1 rounded-xl bg-cyan-600 font-bold text-white">Guess</button><button type="button" autoFocus onClick={() => setSelected(null)} className="min-h-12 flex-1 rounded-xl border font-bold">Cancel</button></div></div></div>}</div></main>;
+  const [game, setGame] = useState<GameState>(() => fresh());
+  const [selected, setSelected] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState("Pick a card to guess, or ask a question.");
+  const [debugSecret, setDebugSecret] = useState("random");
+  const [interpretation, setInterpretation] = useState("");
+  const development = process.env.NODE_ENV === "development";
+  const hydrated = useSyncExternalStore(() => () => {}, () => true, () => false);
+  const selectedCharacter = useMemo(() => canonicalCharacters.find((character) => character.id === selected) ?? null, [selected]);
+
+  function start(secret?: string) {
+    setGame(fresh(secret));
+    setSelected(null);
+    setFeedback("Fresh board ready: 32 characters remaining.");
+  }
+
+  function ask(question: DeductionQuestion) {
+    const result = askQuestion(game, question);
+    if (!result.ok) return setFeedback(result.error);
+    setGame(result.value);
+    const entry = result.value.questionsAsked.at(-1)!;
+    setFeedback(`${entry.answer ? "YES" : "NO"}! ${entry.eliminatedCharacterIds.length} eliminated. ${result.value.remainingCharacterIds.length} remaining.`);
+  }
+
+  function guess(id: string) {
+    const result = guessCharacter(game, id);
+    setSelected(null);
+    if (!result.ok) return setFeedback(result.error);
+    setGame(result.value);
+    const name = canonicalCharacters.find((character) => character.id === id)?.name;
+    if (result.value.status === "won") {
+      setFeedback(`YOU GOT IT! You found ${name}.`);
+      onGameCompleted?.(result.value);
+    } else setFeedback(`Not ${name}. Keep playing.`);
+  }
+
+  function handleIntent(intent: GameIntent) {
+    if (intent.type === "ATTRIBUTE_QUESTION") ask(intent.question);
+    else if (intent.type === "CHARACTER_GUESS") guess(intent.characterId);
+    else setFeedback("I didn't understand that one. Try asking about something you can see on the characters.");
+  }
+
+  return <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#e0f2fe,_#f8fafc_45%,_#f5f3ff)] px-3 py-5 text-slate-900 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl">
+      <header className="mb-6 flex flex-col gap-4 rounded-3xl bg-slate-950 px-5 py-6 text-white shadow-xl sm:flex-row sm:items-center sm:justify-between">
+        <div><p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-300">Walrus Session 8 · Playable placeholder</p><h1 className="mt-1 text-4xl font-black">Who Am AI?</h1><p className="mt-1 text-slate-300">Ask questions. Narrow the board. Find my character.</p></div>
+        <button type="button" onClick={() => start()} className="min-h-12 rounded-xl bg-cyan-400 px-5 font-black text-slate-950">New Game</button>
+      </header>
+      <section aria-live="polite" className={`mb-6 rounded-3xl border p-5 ${game.status === "won" ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase text-slate-500">Current game</p><h2 className="text-2xl font-black">{game.status === "won" ? "🎉 You won!" : `${game.remainingCharacterIds.length} characters still in play`}</h2><p className="mt-1 text-slate-600">{feedback}</p>{game.status === "won" && memoryStatus && <p className="mt-2 font-bold text-cyan-800">{memoryStatus}</p>}</div><div className="rounded-2xl bg-slate-100 px-4 py-3 text-center"><span className="block text-2xl font-black">{game.questionCount}</span><span className="text-xs font-bold uppercase text-slate-500">Actions used</span></div></div>
+      </section>
+      <NaturalLanguagePanel disabled={game.status !== "active"} onIntent={handleIntent} onDebug={(input, intent) => setInterpretation(`${input} → ${JSON.stringify(intent)}`)} />
+      {development && interpretation && <p className="mb-3 text-xs text-slate-500">Latest interpretation: {interpretation}</p>}
+      <section aria-label="Character board" className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
+        {canonicalCharacters.map((character) => {
+          const eliminated = game.eliminatedCharacterIds.includes(character.id);
+          return <button key={character.id} type="button" disabled={eliminated || game.status !== "active"} onClick={() => setSelected(character.id)} aria-label={`Guess ${character.name}${eliminated ? ", eliminated" : ""}`} className={`relative min-h-40 rounded-2xl border p-3 text-left shadow-sm transition ${eliminated ? "rotate-1 border-slate-300 bg-slate-100 opacity-40 grayscale" : "border-slate-200 bg-white hover:-translate-y-1 hover:border-cyan-400"}`}>
+            <span className="absolute right-3 top-3 z-10 text-xs font-bold text-slate-400">{String(character.number).padStart(2, "0")}</span>
+            <CharacterPortrait character={character} className="mb-3 h-24 max-h-24 pr-5" />
+            <span className="block pr-6 text-base font-bold">{character.name}</span><span className="block text-xs font-semibold text-cyan-800">{humanizeValue(character.role)}</span>
+            <span className="mt-3 inline-flex rounded-full bg-slate-100 px-2 py-1 text-[11px]">{character.headwear.type !== "none" ? humanizeValue(character.headwear.type) : `${humanizeValue(character.hair.color)} hair`}</span>
+            {eliminated && <span className="absolute inset-x-2 bottom-2 rounded-lg bg-slate-700 px-2 py-1 text-center text-xs font-bold text-white">ELIMINATED</span>}
+          </button>;
+        })}
+      </section>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2"><details className="rounded-3xl border border-violet-200 bg-violet-50 p-5"><summary className="cursor-pointer text-lg font-black">Developer Question Panel</summary><label className="mt-3 block text-sm font-bold">Question<select disabled={game.status !== "active"} className="mt-1 min-h-12 w-full rounded-xl border border-violet-200 bg-white px-3" onChange={(event) => ask({ kind: "boolean", field: event.target.value as Extract<DeductionQuestion, { kind: "boolean" }> ["field"] })}>{["hasHair", "hasEyewear", "hasHeadwear", "hasFacialHair", "holdingItem", "wearingUniform", "isHuman", "isAnimal", "playsSport"].map((field) => <option key={field} value={field}>{humanizeValue(field)}</option>)}</select></label><p className="mt-2 text-xs text-slate-600">Selecting a question asks it deterministically.</p></details><section className="rounded-3xl border border-slate-200 bg-white p-5"><h2 className="text-lg font-black">Question history</h2>{game.questionsAsked.length ? <ol className="mt-3 space-y-2">{game.questionsAsked.map((entry, index) => <li key={index} className="text-sm">{index + 1}. {questionLabel(entry.question)} — <strong>{entry.answer ? "YES" : "NO"}</strong></li>)}</ol> : <p className="mt-2 text-sm text-slate-500">No questions yet.</p>}</section></div>
+      {development && <section className="mt-6 rounded-3xl border border-amber-300 bg-amber-50 p-5"><p className="text-xs font-bold uppercase text-amber-800">Development only</p><p className="mt-1">Secret: <strong>{hydrated ? canonicalCharacters.find((character) => character.id === game.secretCharacterId)?.name : "Loading…"}</strong></p><label className="mt-3 block text-sm font-bold">Secret<select value={debugSecret} onChange={(event) => setDebugSecret(event.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-amber-300 bg-white px-3"><option value="random">Random</option>{canonicalCharacters.map((character) => <option key={character.id} value={character.id}>{character.name}</option>)}</select></label><button type="button" onClick={() => start(debugSecret === "random" ? undefined : debugSecret)} className="mt-3 min-h-11 rounded-xl bg-amber-400 px-4 font-bold">Start Debug Game</button></section>}
+      {selectedCharacter && <div role="dialog" aria-modal="true" className="fixed inset-0 z-30 flex items-center justify-center bg-slate-950/45 p-4"><div className="w-full max-w-sm rounded-3xl bg-white p-6"><h2 className="text-2xl font-black">Guess {selectedCharacter.name}?</h2><div className="mt-5 flex gap-3"><button type="button" onClick={() => guess(selectedCharacter.id)} className="min-h-12 flex-1 rounded-xl bg-cyan-600 font-bold text-white">Guess</button><button type="button" autoFocus onClick={() => setSelected(null)} className="min-h-12 flex-1 rounded-xl border font-bold">Cancel</button></div></div></div>}
+    </div>
+  </main>;
 }

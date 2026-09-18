@@ -49,6 +49,10 @@ The browser communicates only with the Next.js server; Ollama remains server-sid
 
 Run `npm run validate:data` to check roster integrity and `npm run analyze:data` to review deduction-trait distributions.
 
+## Phase 4A portrait pipeline
+
+Portrait generation is deliberately pre-production: no final character PNGs exist yet. The derived [art manifest](src/data/character-art-manifest.ts) and [art specification](docs/CHARACTER-ART.md) ensure future original portraits match frozen canonical data, remain readable on small cards, and use the expected `/characters/NN-name.png` paths. Run `npm run validate:art:manifest` to validate the 32-entry contract; run `npm run validate:art` only after real accepted PNGs exist. Until then, cards show an accessible development placeholder rather than a broken image.
+
 ## Deterministic game truth
 
 ```
