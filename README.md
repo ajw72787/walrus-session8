@@ -63,6 +63,12 @@ canonical characters.json
 
 The future LLM may translate player language into structured questions, but the TypeScript engine alone evaluates truth, chooses and protects the secret character, eliminates candidates, and resolves guesses.
 
+## Phase 2A interpretation flow
+
+`Player text → local Qwen 2.5 3B via Ollama → validated structured intent → deterministic engine → game state`. Qwen only translates language; it cannot answer facts, eliminate cards, or decide guesses. Run `npm run eval:interpreter` to evaluate the local interpreter (results may vary slightly).
+
+The frozen Phase 2A adversarial evaluation reached 144/154 (93.5%). Safety-sensitive categories were 100% safe-rejected where appropriate; remaining misses are conservative `OTHER` results rather than game-state mutations.
+
 ## Phase 1C playable board
 
 The homepage now provides a responsive, playable placeholder board using the deterministic engine entirely in the browser. It has structured developer question controls, canonical-data placeholder cards, question history, guessing, and development-only secret controls. Character portraits are placeholders; Qwen natural-language gameplay and Walrus Memory integration come in later phases.

@@ -11,6 +11,10 @@
     "analyze:data": "node scripts/analyze-characters.mjs",
     "test:game": "node --experimental-strip-types --test src/lib/game/engine.test.ts",
     "test:ui-helper": "node --experimental-strip-types --test src/lib/game/question-label.test.ts",
+    "test:intent": "node --experimental-strip-types --test src/lib/game/intent.test.ts",
+    "test:intent-action": "node --experimental-strip-types --test src/lib/game/intent-action.test.ts",
+    "test:grounding": "node --experimental-strip-types --test src/lib/game/interpreter-grounding.test.ts",
+    "eval:interpreter": "node --experimental-strip-types scripts/eval-interpreter.ts",
     "demo:game": "node --experimental-strip-types scripts/demo-game.ts"
   },
   "dependencies": {

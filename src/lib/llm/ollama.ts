@@ -91,13 +91,13 @@ export async function checkOllamaHealth(): Promise<OllamaHealth> {
   }
 }
 
-export async function generateWithOllama(message: string): Promise<string> {
+export async function generateWithOllama(message: string, options?: { format?: "json"; temperature?: number; numPredict?: number }): Promise<string> {
   const response = await requestOllama(
     "/api/generate",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: getOllamaModel(), prompt: message, stream: false }),
+      body: JSON.stringify({ model: getOllamaModel(), prompt: message, stream: false, ...(options?.format ? { format: options.format } : {}), ...(options?.temperature !== undefined || options?.numPredict !== undefined ? { options: { ...(options.temperature !== undefined ? { temperature: options.temperature } : {}), ...(options.numPredict !== undefined ? { num_predict: options.numPredict } : {}) } } : {}) }),
     },
     GENERATE_TIMEOUT_MS,
   );
