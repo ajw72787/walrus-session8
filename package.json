@@ -6,7 +6,9 @@
     "dev": "next dev --hostname 0.0.0.0 -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "validate:data": "node scripts/validate-characters.mjs",
+    "analyze:data": "node scripts/analyze-characters.mjs"
   },
   "dependencies": {
     "next": "16.3.5",

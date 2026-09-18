@@ -1,0 +1,34 @@
+export const SPECIES = ["human", "robot", "dog"] as const;
+export const AGE_GROUPS = ["young", "adult", "older", "unknown"] as const;
+export const PRESENTATIONS = ["feminine", "masculine", "neutral", "nonbinary"] as const;
+export const HAIR_COLORS = ["none", "black", "brown", "blond", "red", "gray", "green", "purple", "golden"] as const;
+export const HAIR_LENGTHS = ["none", "short", "medium", "long"] as const;
+export const HAIR_STYLES = ["none", "straight", "curly", "wavy"] as const;
+export const EYEWEAR_TYPES = ["none", "glasses", "goggles", "snow_goggles", "eye_patch"] as const;
+export const HEADWEAR_TYPES = ["none", "cap", "helmet", "crown", "chef_hat", "cowboy_hat", "sun_hat", "pirate_hat", "wizard_hat", "beret", "beanie", "pilot_cap", "headphones", "cat_ear_headphones"] as const;
+export const FACIAL_HAIR_TYPES = ["none", "mustache", "beard"] as const;
+export const COLORS = ["none", "black", "white", "brown", "blue", "pink", "purple", "orange", "green", "yellow", "tan", "red", "teal", "silver", "golden", "navy", "gray"] as const;
+export const CLOTHING_TYPES = ["casual", "student", "royal_adventurer", "goalie_gear", "lab_coat", "surfer", "chef_uniform", "cowboy", "gamer", "football_uniform", "explorer", "astronaut_suit", "inventor", "photographer", "doctor_coat", "pirate", "soccer_uniform", "firefighter_uniform", "wizard_robe", "artist_smock", "baker_uniform", "martial_arts_gi", "snowboard_gear", "rock_outfit", "robot_body", "animal_fur", "pilot_uniform", "fisherman"] as const;
+export const ROLES = ["skateboarder", "student", "royal_adventurer", "hockey_goalie", "scientist", "surfer", "chef", "cowboy", "gamer", "football_player", "explorer", "astronaut", "inventor", "photographer", "doctor", "pirate", "soccer_player", "firefighter", "wizard", "artist", "baker", "martial_artist", "snowboarder", "rock_musician", "robot", "golden_retriever", "bulldog", "pilot", "fisherman", "dj_music_fan"] as const;
+export const CATEGORIES = ["sports", "profession", "fantasy_adventure", "entertainment", "animal", "technology"] as const;
+export const VISIBLE_ITEMS = ["skateboard", "backpack", "surfboard", "wooden_spoon", "football", "map", "wrench", "camera", "stethoscope", "controller", "soccer_ball", "wand", "binoculars", "paintbrush", "cupcake", "guitar", "antenna", "fishing_rod"] as const;
+
+export type Character = {
+  id: string;
+  number: number;
+  name: string;
+  species: (typeof SPECIES)[number];
+  ageGroup: (typeof AGE_GROUPS)[number];
+  presentation: (typeof PRESENTATIONS)[number];
+  hair: { color: (typeof HAIR_COLORS)[number]; length: (typeof HAIR_LENGTHS)[number]; style: (typeof HAIR_STYLES)[number] };
+  eyewear: { type: (typeof EYEWEAR_TYPES)[number]; color: (typeof COLORS)[number] };
+  headwear: { type: (typeof HEADWEAR_TYPES)[number]; color: (typeof COLORS)[number] };
+  facialHair: { type: (typeof FACIAL_HAIR_TYPES)[number]; color: (typeof COLORS)[number] };
+  clothing: { primaryColor: (typeof COLORS)[number]; secondaryColor: (typeof COLORS)[number]; type: (typeof CLOTHING_TYPES)[number] };
+  role: (typeof ROLES)[number];
+  category: (typeof CATEGORIES)[number];
+  visibleItems: Array<(typeof VISIBLE_ITEMS)[number]>;
+  traits: { hasHair: boolean; hasEyewear: boolean; hasHeadwear: boolean; hasFacialHair: boolean; holdingItem: boolean; wearingUniform: boolean; isHuman: boolean; isAnimal: boolean; playsSport: boolean };
+  imagePath: string;
+  artworkDescription: string;
+};

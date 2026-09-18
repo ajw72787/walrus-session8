@@ -43,3 +43,19 @@ The Phase 0 API surface adds the following checks for local development:
 - `GET /api/llm/health` makes a server-side request to Ollama's model listing and verifies that the configured model is available.
 - `POST /api/llm/test` sends a development prompt to the configured Ollama model through the Next.js server and returns its response.
 - Project validation includes linting and a production build/type validation.
+
+---
+
+## Phase 1A — Canonical Character Dataset
+
+- Added the authoritative 32-character JSON roster, controlled TypeScript vocabulary, and derived visible deduction traits.
+- Added dependency-free dataset validation for roster integrity, controlled values, image path conventions, derived trait consistency, species relationships, and artwork descriptions.
+- Added a distribution-analysis script to flag unbalanced opening deduction questions before artwork or game logic is introduced.
+- Character image paths describe future expected assets only; no artwork has been generated in this phase.
+
+---
+
+## Phase 1A — Targeted Age and Headwear Revision
+
+- Replaced the age vocabulary with `young`, `adult`, `older`, and `unknown`; the 29 human characters are assigned as 7 young, 20 adult, and 2 older, while all non-human characters remain unknown.
+- Removed only Ava's and Kai's caps, with matching derived traits and artwork descriptions updated.

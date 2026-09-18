@@ -43,6 +43,12 @@ Qwen 2.5 3B
 
 The browser communicates only with the Next.js server; Ollama remains server-side. Walrus Memory integration will be added in a later phase.
 
+## Canonical character data
+
+[src/data/characters.json](src/data/characters.json) is the authoritative 32-character roster. Future artwork must match its visual fields and future game logic must use it for facts and deduction traits; an LLM must never invent or override those facts. The referenced `/characters/NN-name.png` paths are expected future asset locations, not artwork that exists today.
+
+Run `npm run validate:data` to check roster integrity and `npm run analyze:data` to review deduction-trait distributions.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

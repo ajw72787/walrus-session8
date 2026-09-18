@@ -1,0 +1,31 @@
+import { characters, countBy, splitQuality } from "./character-dataset.mjs";
+
+const total = characters.length;
+const print = (label, value) => console.log(`${label}: ${JSON.stringify(value)}`);
+const booleanQuestion = (label, selector) => print(label, splitQuality(characters.filter(selector).length, total));
+
+console.log("Walrus Session 8 canonical character dataset analysis");
+console.log("Split quality uses the smaller YES/NO side divided by 32: 50% excellent, 40–49% good, 25–39% moderate, under 25% poor.");
+print("Total characters", total);
+print("Species", countBy(characters, (c) => c.species));
+print("Human/non-human", { human: characters.filter((c) => c.traits.isHuman).length, nonHuman: characters.filter((c) => !c.traits.isHuman).length });
+print("Presentation", countBy(characters, (c) => c.presentation));
+print("Age group", countBy(characters, (c) => c.ageGroup));
+print("Hair colors", countBy(characters, (c) => c.hair.color));
+print("Hair lengths", countBy(characters, (c) => c.hair.length));
+print("Hair styles", countBy(characters, (c) => c.hair.style));
+print("Eyewear types", countBy(characters, (c) => c.eyewear.type));
+print("Headwear types", countBy(characters, (c) => c.headwear.type));
+print("Facial hair types", countBy(characters, (c) => c.facialHair.type));
+print("Primary clothing colors", countBy(characters, (c) => c.clothing.primaryColor));
+print("Categories", countBy(characters, (c) => c.category));
+console.log("Opening split analysis:");
+booleanQuestion("hasHair", (c) => c.traits.hasHair);
+booleanQuestion("hasEyewear", (c) => c.traits.hasEyewear);
+booleanQuestion("hasHeadwear", (c) => c.traits.hasHeadwear);
+booleanQuestion("hasFacialHair", (c) => c.traits.hasFacialHair);
+booleanQuestion("holdingItem", (c) => c.traits.holdingItem);
+booleanQuestion("wearingUniform", (c) => c.traits.wearingUniform);
+booleanQuestion("isHuman", (c) => c.traits.isHuman);
+booleanQuestion("isAnimal", (c) => c.traits.isAnimal);
+booleanQuestion("playsSport", (c) => c.traits.playsSport);
