@@ -1,0 +1,3 @@
+import { normalizeMemoryPreference, type MemoryPreference } from "./memory-preference.ts";
+export type ProfileRequest = { ok: true; memory: MemoryPreference } | { ok: false; error: string };
+export function parseProfileRequest(url: URL): ProfileRequest { if (url.searchParams.has("namespace") || url.searchParams.has("playerId")) return { ok: false, error: "Player identity and namespace are server-resolved." }; const memory = url.searchParams.get("memory"); if (memory !== null && memory !== "on" && memory !== "off") return { ok: false, error: "Memory preference is invalid." }; return { ok: true, memory: normalizeMemoryPreference(memory) }; }

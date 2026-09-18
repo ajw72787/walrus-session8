@@ -12,4 +12,6 @@ The visible message, “Reviewing this game for useful memories…”, appeared 
 
 ## Scope for later investigation
 
-The Phase 3C endpoint performs mainnet recall, candidate/dedup work, and a `remember()` plus wait-for-indexing path. Future work may separately measure these segments and improve player-facing progress feedback. Do not change retry or timeout behavior based on this single successful observation.
+The Phase 3C endpoint performs mainnet recall, candidate/dedup work, optional Qwen analysis after sufficient history, `remember()`, and `waitForRememberJob()` before responding. Local inspection of MemWal 0.1.7 found that `waitForRememberJob()` polls at 1.5 seconds initially, increases the delay with jitter up to 10 seconds, and defaults to 60 seconds; Who Am AI explicitly uses 120 seconds. It returns only after the write job reaches completion/indexing or fails.
+
+The endpoint therefore waits for indexing before the player sees success. The UI does not require indexing merely to truthfully say that a write was accepted: `remember()` already returns a job ID. A future safe UX proposal is to persist an idempotency key derived from player/game ID, acknowledge an accepted job as “Game saved; memory is processing,” then poll/reconcile that known job without issuing a duplicate write. This requires durable job tracking and duplicate-safe recovery; it is not implemented here. Do not change retry or timeout behavior based on this single successful observation.

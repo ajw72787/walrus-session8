@@ -1,0 +1,5 @@
+import "server-only";
+import type { CompletedGameEvidence } from "@/lib/memory/game-memory";
+import { generateWithOllama } from "./ollama";
+const prompt = `Return JSON only: {"observations":[]}. Analyze only supplied completed-game question evidence. Return zero observations unless at least three distinct games support them. Allowed type: STRATEGY or PREFERENCE. Allowed patterns: headwear, color, role, broad_visual. Each observation must cite only supplied gameIds and questionFields. Never infer ability, intelligence, personality, psychology, demographics, health, or facts not in evidence.`;
+export async function interpretPlayerHistory(games: readonly CompletedGameEvidence[]): Promise<unknown> { if (games.length < 3) return { observations: [] }; const evidence = games.map((game) => ({ gameId: game.gameId, questions: game.questions.map((entry) => entry.question.field) })); return JSON.parse(await generateWithOllama(`${prompt}\nEvidence:${JSON.stringify(evidence)}`, { format: "json", temperature: 0, numPredict: 160 })) as unknown; }

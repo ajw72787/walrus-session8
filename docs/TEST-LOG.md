@@ -193,3 +193,23 @@ The Phase 0 API surface adds the following checks for local development:
 - **Meaningful gameplay memory #1 for Aaron (Session 8 evidence):** type `GAME_RESULT`; text `Aaron won against Tessa in 6 actions.`; originating game `game-mu7fn1sg-vo3fz61n6dmgp`; blob `SUQvhczh1UpGgp-sJ0G5-xI5NdqlIi1mu7_TFJZiKDU`.
 - **Latency observation:** `POST /api/memory/game-complete` completed in approximately 79 seconds (Next.js 386 ms; application code approximately 79 seconds). From the player’s perspective, “Reviewing this game for useful memories…” appeared stalled for several minutes before ultimately succeeding. This is UX/integration friction for investigation, **not a confirmed bug**. Timeout and retry behavior were intentionally not changed.
 - Phase 3C is complete. No additional gameplay memories were created during validation.
+
+---
+
+## Phase 3D-A — Memory-Aware Player Model + Personalization Infrastructure (local only)
+
+- Added safe parsing/classification of structured gameplay-memory envelopes. Connectivity markers, malformed envelopes, and arbitrary recalled text are excluded from player modeling.
+- Added deterministic read-only profiles with supported results, aggregate action/question patterns, character encounter counts, established observations, separately labelled proposed interpretations, evidence quality, and insufficient-evidence behavior.
+- Added a session-authenticated `GET /api/memory/profile` endpoint. It rejects player/namespace parameters and returns `memory_off` without a Walrus recall or Qwen interpretation when Memory is OFF.
+- Added synthetic **NON-PRODUCTION / NON-CONTEST** fixture data for parser/profile/ranking tests only. Fixtures are never written to Walrus and do not count as Session 8 memories.
+- Added pure future Challenge-Me ranking preparation. With fewer than three completed games it returns neutral deterministic candidates rather than claiming player knowledge.
+- Added local latency-pipeline inspection and a future idempotent accepted-job/background-reconciliation proposal. No timeout, retry, write, or live behavior was changed.
+
+### Manual Phase 3D-A browser validation — PASS
+
+- **Aaron, Memory ON:** active profile `Aaron` / `whoamai:player_aaron`; Build Player Profile returned one meaningful memory, one completed game, and `results_only` evidence. The known factual result was a win against Tessa in six actions. Established observations: 0; proposed interpretations: 0.
+- This manually demonstrated the complete read chain: **Walrus recall → validated gameplay-memory parsing → deterministic PlayerMemoryProfile → insufficient-evidence handling**.
+- Aaron's one game produced factual continuity only, with **zero behavioral conclusions**. This conservative result is intentional: the system did not invent a tendency from one game.
+- **Aaron, Memory OFF:** Build Player Profile returned “Memory is OFF — no Walrus recall or Qwen interpretation was requested.” This confirms OFF bypasses the personalization read path.
+- **Leo, Memory ON:** active profile `Leo` / `whoamai:player_leo`; Build Player Profile returned zero meaningful memories, zero completed games, `none` evidence, zero established observations, and zero proposed interpretations. Aaron's Tessa result did not appear, manually confirming browser-level profile isolation.
+- Phase 3D-A is complete. No new gameplay memories, mainnet writes, or live connectivity tests were created during validation.
