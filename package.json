@@ -16,6 +16,7 @@
     "test:grounding": "node --experimental-strip-types --test src/lib/game/interpreter-grounding.test.ts",
     "test:memory": "node --experimental-strip-types --test src/lib/memory/players.test.ts",
     "test:player": "node --experimental-strip-types --test src/lib/memory/player-auth.test.ts",
+    "test:game-memory": "node --experimental-strip-types --test src/lib/memory/game-memory.test.ts",
     "test:memwal:live": "node --experimental-strip-types scripts/test-memwal-connectivity.ts",
     "eval:interpreter": "node --experimental-strip-types scripts/eval-interpreter.ts",
     "demo:game": "node --experimental-strip-types scripts/demo-game.ts"

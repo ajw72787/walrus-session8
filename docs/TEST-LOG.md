@@ -174,3 +174,22 @@ The Phase 0 API surface adds the following checks for local development:
 - Incorrect-PIN rejection PASS; authenticated session persistence across refresh PASS; Memory ON/OFF persistence across refresh PASS; gameplay remained unchanged by Memory ON/OFF PASS.
 - All returned `WHOAMAI_CONNECTIVITY_TEST` records are connectivity-test artifacts. They do **not** count toward the Session 8 requirement of ten meaningful memories per user.
 - **Phase 3B complete.** No new Walrus writes were made during this browser validation.
+
+---
+
+## Phase 3C — Meaningful Game Memory
+
+- Added a server-validated completed-game evidence model. The client sends raw engine facts only; the server supplies completion time and rejects invalid game IDs, canonical character IDs, outcomes, counts, and question structures.
+- Added controlled memory taxonomy: `GAME_RESULT`, `STRATEGY`, `CHARACTER_HISTORY`, `MILESTONE`, and `PREFERENCE`. Phase 3C deterministically produces only a factual `GAME_RESULT` candidate for an eligible completed win; it does not inflate memory count with trivial events.
+- Persisted gameplay records are append-only structured `[WHOAMAI_GAME_MEMORY]` envelopes with provenance. Exact same-game/type or same-text candidates are rejected as duplicates; no unsupported MemWal mutation/replacement behavior is assumed.
+- Local Qwen receives structured completed-game histories only. It can propose only allowlisted `STRATEGY`/`PREFERENCE` patterns after at least three games, citing game IDs and question fields. Malformed, invented, unsupported, sensitive, psychological, or insufficiently cited proposals are rejected.
+- Added `POST /api/memory/game-complete`. It obtains the canonical player only from the signed session, rejects supplied player IDs/namespaces, honors Memory OFF with zero recall/Qwen/write activity, and returns safe candidate, rejection, Qwen, job, and blob status only.
+- Development Memory Inspector now labels connectivity artifacts versus parsed meaningful gameplay records, exposes originating game ID/type, and counts meaningful gameplay memories separately from connectivity-test artifacts.
+- **First legitimate gameplay-memory validation — PASS:** Aaron (`player_aaron`) played a real Memory ON game in `whoamai:player_aaron` and correctly identified Tessa. The deterministic completion flow displayed “Reviewing this game for useful memories…”, then returned `POST /api/memory/game-complete` HTTP 200 and displayed “Saved 1 useful memory.”
+- The complete demonstrated chain was: **real authenticated player → real completed deterministic game → validated game evidence → selective `GAME_RESULT` candidate → Walrus mainnet write → successful indexing → manual subsequent recall → correct player namespace**.
+- Aaron's recalled records contained **1 meaningful gameplay memory** and **2 connectivity-test artifacts**. The artifacts remain excluded from Session 8 meaningful-memory accounting:
+  - `[WHOAMAI_CONNECTIVITY_TEST] Aaron connectivity marker 1789761976516-b3n3fmmb6eo` — blob `NHG-IyhVZKZuOJnQNQRwPw9PU2msVdwsLu2kdcaetEo`.
+  - `[WHOAMAI_CONNECTIVITY_TEST] Aaron connectivity marker 1789760850617-7hp3hyn4d1e` — blob `K9PO0EcxVvF_qgGDH8-x4brqawFWHNpuUzNkOKUDmrw`.
+- **Meaningful gameplay memory #1 for Aaron (Session 8 evidence):** type `GAME_RESULT`; text `Aaron won against Tessa in 6 actions.`; originating game `game-mu7fn1sg-vo3fz61n6dmgp`; blob `SUQvhczh1UpGgp-sJ0G5-xI5NdqlIi1mu7_TFJZiKDU`.
+- **Latency observation:** `POST /api/memory/game-complete` completed in approximately 79 seconds (Next.js 386 ms; application code approximately 79 seconds). From the player’s perspective, “Reviewing this game for useful memories…” appeared stalled for several minutes before ultimately succeeding. This is UX/integration friction for investigation, **not a confirmed bug**. Timeout and retry behavior were intentionally not changed.
+- Phase 3C is complete. No additional gameplay memories were created during validation.

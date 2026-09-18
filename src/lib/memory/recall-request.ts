@@ -1,4 +1,4 @@
-export const DEFAULT_MEMORY_RECALL_QUERY = "[WHOAMAI_CONNECTIVITY_TEST]";
+export const DEFAULT_MEMORY_RECALL_QUERY = "[WHOAMAI";
 
 export type RecallRequest = { ok: true; query: string } | { ok: false; error: string };
 

@@ -77,6 +77,12 @@ MemWal 0.1.7 is integrated server-side only. A manual mainnet run verified authe
 
 The browser selects one canonical household player and verifies a four-digit server-configured PIN. A signed HTTP-only session cookie then identifies only that verified canonical player to the read-only memory API; the server derives the MemWal namespace and rejects caller-supplied namespaces. Browser testing verified Aaron and Leo's separate mainnet recall namespaces. In development, the Memory Inspector recalls only the active player's namespace when requested manually. Phase 3A connectivity-test markers are test artifacts, not meaningful gameplay memories and do not count toward the ten-meaningful-memories-per-user requirement.
 
+## Phase 3C meaningful game memory
+
+Completed games remain ephemeral. When the locally selected Memory setting is ON, a completed win can submit raw engine evidence to the authenticated server for selective review. The server validates canonical fields, creates a factual `GAME_RESULT` candidate, deduplicates against prior append-only gameplay records, and may ask local Qwen for strictly cited strategy/preference proposals only after at least three completed games exist. Qwen cannot establish game truth or write unsupported claims. Connectivity-test artifacts remain excluded from meaningful-memory accounting.
+
+The first legitimate mainnet gameplay-memory write has been manually validated for Aaron: a completed win against Tessa produced one recalled `GAME_RESULT` record in Aaron’s isolated namespace. It is meaningful gameplay memory #1 for Aaron; Phase 3A connectivity-test artifacts remain excluded.
+
 ## Phase 1C playable board
 
 The homepage now provides a responsive, playable placeholder board using the deterministic engine entirely in the browser. It has structured developer question controls, canonical-data placeholder cards, question history, guessing, and development-only secret controls. Character portraits are placeholders; gameplay-memory integration comes in a later phase.

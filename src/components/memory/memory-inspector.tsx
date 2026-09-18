@@ -1,26 +1,11 @@
 "use client";
-
 import { useState } from "react";
+import { isConnectivityTestArtifact, meaningfulMemoryCount, parseGameMemory } from "@/lib/memory/game-memory";
 import type { PlayerProfile } from "@/lib/memory/players";
-
-type RecallResponse = {
-  ok: boolean;
-  error?: string;
-  player?: PlayerProfile;
-  namespace?: string;
-  query?: string;
-  memories?: Array<{ blobId: string; text: string; distance: number; createdAt: string | null }>;
-  total?: number;
-};
-
+type Result = { ok: boolean; error?: string; namespace?: string; memories?: Array<{ blobId: string; text: string; distance: number; createdAt: string | null }>; total?: number };
 export function MemoryInspector({ activePlayer }: { activePlayer: PlayerProfile }) {
-  const [result, setResult] = useState<RecallResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const recall = async () => {
-    setLoading(true);
-    try { setResult(await (await fetch("/api/memory/recall", { cache: "no-store" })).json() as RecallResponse); }
-    catch { setResult({ ok: false, error: "Memory Inspector could not reach the local server." }); }
-    finally { setLoading(false); }
-  };
-  return <section className="rounded-3xl border border-amber-300 bg-amber-50 p-5" aria-labelledby="memory-inspector-title"><p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-800">Development only</p><h2 id="memory-inspector-title" className="text-lg font-black text-slate-900">Memory Inspector</h2><dl className="mt-3 grid gap-2 text-sm sm:grid-cols-3"><div><dt className="font-bold text-slate-500">Active player</dt><dd>{activePlayer.displayName}</dd></div><div><dt className="font-bold text-slate-500">Canonical player ID</dt><dd className="font-mono text-xs">{activePlayer.id}</dd></div><div><dt className="font-bold text-slate-500">Resolved namespace</dt><dd className="font-mono text-xs">whoamai:{activePlayer.id}</dd></div></dl><button type="button" disabled={loading} onClick={recall} className="mt-4 min-h-11 rounded-xl bg-amber-400 px-4 font-bold text-amber-950 hover:bg-amber-300 disabled:bg-slate-300">{loading ? "Recalling…" : "Recall memories"}</button><p className="mt-3 text-xs text-amber-900">Phase 3A connectivity-test markers may appear below. They are test artifacts, not meaningful gameplay memories.</p>{result && <div className="mt-4 rounded-2xl bg-white p-4 text-sm"><p className={result.ok ? "font-bold text-emerald-700" : "font-bold text-rose-700"}>{result.ok ? `Recall complete: ${result.total ?? 0} result(s)` : `Recall unavailable: ${result.error}`}</p>{result.ok && <ul className="mt-3 space-y-3">{result.memories?.length ? result.memories.map((memory) => <li key={memory.blobId} className="rounded-xl border border-slate-200 p-3"><p className="whitespace-pre-wrap text-slate-800">{memory.text}</p><p className="mt-1 font-mono text-xs text-slate-500">Blob: {memory.blobId}</p></li>) : <li className="text-slate-500">No memories matched this recall query.</li>}</ul>}</div>}</section>;
+  const [result, setResult] = useState<Result | null>(null); const [loading, setLoading] = useState(false);
+  const recall = async () => { setLoading(true); try { setResult(await (await fetch("/api/memory/recall", { cache: "no-store" })).json() as Result); } catch { setResult({ ok: false, error: "Memory Inspector could not reach the local server." }); } finally { setLoading(false); } };
+  const memories = result?.memories ?? []; const meaningful = meaningfulMemoryCount(memories.map((memory) => memory.text)); const artifacts = memories.filter((memory) => isConnectivityTestArtifact(memory.text)).length;
+  return <section className="rounded-3xl border border-amber-300 bg-amber-50 p-5"><p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-800">Development only</p><h2 className="text-lg font-black">Memory Inspector</h2><dl className="mt-3 grid gap-2 text-sm sm:grid-cols-3"><div><dt className="font-bold text-slate-500">Active player</dt><dd>{activePlayer.displayName}</dd></div><div><dt className="font-bold text-slate-500">Canonical player ID</dt><dd className="font-mono text-xs">{activePlayer.id}</dd></div><div><dt className="font-bold text-slate-500">Resolved namespace</dt><dd className="font-mono text-xs">whoamai:{activePlayer.id}</dd></div></dl><button type="button" disabled={loading} onClick={recall} className="mt-4 min-h-11 rounded-xl bg-amber-400 px-4 font-bold text-amber-950 disabled:bg-slate-300">{loading ? "Recalling…" : "Recall memories"}</button>{result && <div className="mt-4 rounded-2xl bg-white p-4 text-sm"><p className={result.ok ? "font-bold text-emerald-700" : "font-bold text-rose-700"}>{result.ok ? `Recall complete: ${result.total ?? 0} result(s)` : `Recall unavailable: ${result.error}`}</p>{result.ok && <><p className="mt-2">Meaningful gameplay memories: <strong>{meaningful}</strong> · Connectivity-test artifacts: <strong>{artifacts}</strong></p><ul className="mt-3 space-y-3">{memories.length ? memories.map((memory) => { const gameplay = parseGameMemory(memory.text); return <li key={memory.blobId} className="rounded-xl border border-slate-200 p-3"><p className="font-bold text-slate-700">{gameplay ? `${gameplay.type} · meaningful gameplay memory` : isConnectivityTestArtifact(memory.text) ? "Connectivity-test artifact" : "Other recalled record"}</p><p className="mt-1 whitespace-pre-wrap text-slate-800">{gameplay?.text ?? memory.text}</p>{gameplay && <p className="mt-1 text-xs text-slate-500">Originating game: {gameplay.gameId}</p>}<p className="mt-1 font-mono text-xs text-slate-500">Blob: {memory.blobId}</p></li>; }) : <li className="text-slate-500">No memories matched this recall query.</li>}</ul></>}</div>}</section>;
 }
