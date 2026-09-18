@@ -174,6 +174,20 @@ export function evaluateQuestion(characterId: string, question: unknown): Engine
   return { ok: true, value: evaluateValidatedQuestion(character, validatedQuestion.value) };
 }
 
+/**
+ * Session identifiers are for local game bookkeeping only, never security.
+ * Some browser environments omit randomUUID, so retain a non-cryptographic fallback.
+ */
+export function generateGameId(): string {
+  const runtimeCrypto = globalThis.crypto;
+  if (typeof runtimeCrypto?.randomUUID === "function") return runtimeCrypto.randomUUID();
+
+  const randomSuffix = typeof runtimeCrypto?.getRandomValues === "function"
+    ? Array.from(runtimeCrypto.getRandomValues(new Uint32Array(2)), (value) => value.toString(36)).join("")
+    : `${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+  return `game-${Date.now().toString(36)}-${randomSuffix}`;
+}
+
 export function createGame(secretCharacterId?: string): EngineResult<GameState> {
   const secretId = secretCharacterId ?? allCharacterIds[Math.floor(Math.random() * allCharacterIds.length)];
   if (!characterById.has(secretId)) return { ok: false, error: "Secret character ID is invalid." };
@@ -181,7 +195,7 @@ export function createGame(secretCharacterId?: string): EngineResult<GameState> 
   return {
     ok: true,
     value: {
-      gameId: crypto.randomUUID(),
+      gameId: generateGameId(),
       secretCharacterId: secretId,
       remainingCharacterIds: [...allCharacterIds],
       eliminatedCharacterIds: [],

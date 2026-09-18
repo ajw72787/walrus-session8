@@ -63,6 +63,10 @@ canonical characters.json
 
 The future LLM may translate player language into structured questions, but the TypeScript engine alone evaluates truth, chooses and protects the secret character, eliminates candidates, and resolves guesses.
 
+## Phase 1C playable board
+
+The homepage now provides a responsive, playable placeholder board using the deterministic engine entirely in the browser. It has structured developer question controls, canonical-data placeholder cards, question history, guessing, and development-only secret controls. Character portraits are placeholders; Qwen natural-language gameplay and Walrus Memory integration come in later phases.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

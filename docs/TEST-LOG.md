@@ -67,3 +67,19 @@ The Phase 0 API surface adds the following checks for local development:
 - Added deterministic, allowlisted structured-question evaluation over the frozen canonical dataset; no LLM participates in game truth.
 - Added immutable game-state transitions for questions and guesses, including safe failures after completion and for invalid inputs.
 - Added Node-native automated engine tests and an AI-free command-line demo using a known secret character.
+
+---
+
+## Phase 1C — Playable Placeholder Board
+
+- Added a responsive browser board backed directly by the deterministic TypeScript engine and frozen canonical dataset.
+- Added controlled developer question inputs, question history, confirmation-based character guessing, and development-only secret controls.
+- Cards intentionally use metadata placeholders; no character portraits or gameplay LLM integration were added.
+
+### Manual browser integration bug — game ID initialization
+
+- **Observed:** `crypto.randomUUID is not a function`
+- **Environment:** Next.js 16.3.5 development server; client-side Phase 1C game initialization; browser accessed through the local development application.
+- **Expected:** `createGame()` initializes a valid game with a `gameId`.
+- **Actual:** Client-side initialization crashes before the playable board can load.
+- **Resolution:** Added an environment-safe game-ID helper. It uses `crypto.randomUUID()` when available, then `getRandomValues()` when available, and otherwise a timestamp plus `Math.random()` fallback. IDs are local session labels only and are not used for security-sensitive purposes. Added a regression test with `randomUUID` unavailable.

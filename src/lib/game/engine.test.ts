@@ -34,6 +34,18 @@ test("3. random games always choose a canonical character", () => {
   }
 });
 
+test("3a. game creation falls back when randomUUID is unavailable", () => {
+  const originalCrypto = Object.getOwnPropertyDescriptor(globalThis, "crypto");
+  Object.defineProperty(globalThis, "crypto", { configurable: true, value: {} });
+  try {
+    const state = unwrap(createGame("ava"));
+    assert.match(state.gameId, /^game-[a-z0-9]+-[a-z0-9]+$/);
+  } finally {
+    if (originalCrypto) Object.defineProperty(globalThis, "crypto", originalCrypto);
+    else delete (globalThis as { crypto?: Crypto }).crypto;
+  }
+});
+
 test("4. hasHeadwear evaluates deterministically", () => {
   assert.equal(unwrap(evaluateQuestion("finn", { kind: "boolean", field: "hasHeadwear" })), true);
   assert.equal(unwrap(evaluateQuestion("ava", { kind: "boolean", field: "hasHeadwear" })), false);

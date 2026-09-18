@@ -10,6 +10,7 @@
     "validate:data": "node scripts/validate-characters.mjs",
     "analyze:data": "node scripts/analyze-characters.mjs",
     "test:game": "node --experimental-strip-types --test src/lib/game/engine.test.ts",
+    "test:ui-helper": "node --experimental-strip-types --test src/lib/game/question-label.test.ts",
     "demo:game": "node --experimental-strip-types scripts/demo-game.ts"
   },
   "dependencies": {
