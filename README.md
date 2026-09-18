@@ -73,6 +73,10 @@ The frozen Phase 2A adversarial evaluation reached 144/154 (93.5%). Safety-sensi
 
 MemWal 0.1.7 is integrated server-side only. A manual mainnet run verified authenticated `remember()` writes, indexed recall, returned blob IDs, and bidirectional isolation for the fixed Aaron and Leo namespaces. This only establishes connectivity; gameplay is not yet writing meaningful player memories.
 
+## Phase 3B player identity and Memory Inspector
+
+The browser selects one canonical household player and verifies a four-digit server-configured PIN. A signed HTTP-only session cookie then identifies only that verified canonical player to the read-only memory API; the server derives the MemWal namespace and rejects caller-supplied namespaces. Browser testing verified Aaron and Leo's separate mainnet recall namespaces. In development, the Memory Inspector recalls only the active player's namespace when requested manually. Phase 3A connectivity-test markers are test artifacts, not meaningful gameplay memories and do not count toward the ten-meaningful-memories-per-user requirement.
+
 ## Phase 1C playable board
 
 The homepage now provides a responsive, playable placeholder board using the deterministic engine entirely in the browser. It has structured developer question controls, canonical-data placeholder cards, question history, guessing, and development-only secret controls. Character portraits are placeholders; gameplay-memory integration comes in a later phase.

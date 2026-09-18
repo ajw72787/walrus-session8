@@ -1,5 +1,5 @@
-import { PlayableGame } from "@/components/game/playable-game";
+import { PlayerExperience } from "@/components/player/player-experience";
 
 export default function Home() {
-  return <PlayableGame />;
+  return <PlayerExperience />;
 }

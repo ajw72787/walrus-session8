@@ -140,3 +140,37 @@ The Phase 0 API surface adds the following checks for local development:
 - **Timeout note:** the reported `timeoutMs=25000` is not the script's 120-second wait timeout and was not found as a local SDK default for this `remember()` path. It appears to be reported by the relayer/Seal/upstream RPC path, but the source cannot be determined from local inspection alone.
 - **Classification:** POSSIBLE Walrus/Seal/RPC rate-limit friction item, not a confirmed SDK bug. Observed once manually; needs reproduction before filing externally.
 - **Subsequent outcome:** a later unchanged manual `npm run test:memwal:live` run completed successfully: relayer health, Aaron and Leo authenticated writes, both recalls, and bidirectional isolation all passed. The original rate-limit evidence is retained; it currently appears transient and remains not a confirmed bug.
+
+---
+
+## Phase 3B — Player Identity + Memory Inspector
+
+- Added canonical browser player selection for Aaron, Leo, and Henry, sourced from the shared allowlisted player definitions.
+- Added a simple four-digit household PIN gate. PIN configuration remains server-side (`PLAYER_AARON_PIN`, `PLAYER_LEO_PIN`, `PLAYER_HENRY_PIN`) and is separate from MemWal credentials.
+- Successful PIN verification creates a signed, HTTP-only, same-site player-session cookie containing only a canonical player ID and expiry. The browser never receives configured PINs or MemWal credentials.
+- Added `GET /api/memory/recall`. It requires the verified session, derives the namespace internally, rejects a `namespace` query parameter, and returns only safe recall data for the active canonical player.
+- Added a development-only manual Memory Inspector. It does not recall on render; Phase 3A connectivity-test markers may appear and are labelled as test artifacts rather than meaningful gameplay memories.
+- Added local Memory ON/OFF preference persistence as a Phase 3B control only. It does not change gameplay or trigger recall yet.
+- Deterministic tests cover canonical profile lookup, configured/incompatible PIN behavior through injected test configuration, signed-session tamper/expiry rejection, namespace-parameter rejection, and ON/OFF preference normalization. No live mainnet operation is part of these tests.
+- Local validation passed: memory/player tests, game tests, UI helper tests, interpreter tests, grounding tests, canonical dataset validation, lint, and production build. The live mainnet script was intentionally not rerun.
+
+### Manual Phase 3B test plan
+
+1. Open the app, choose Aaron, and enter Aaron's configured PIN; confirm the game loads as Aaron.
+2. In development, open the Memory Inspector, choose **Recall memories**, and confirm its resolved namespace is `whoamai:player_aaron` and only Aaron results appear.
+3. Use **Switch player**, choose Leo, and enter Leo's PIN. Recall again; confirm `whoamai:player_leo` and that Aaron's connectivity marker is absent.
+4. Try an incorrect PIN and confirm profile activation is refused.
+5. Refresh after successful activation and confirm the verified session remains active.
+6. Toggle Memory ON/OFF, refresh, and confirm the local preference persists. Confirm it does not change gameplay in this phase.
+
+### Manual Phase 3B browser validation — PASS
+
+- The complete flow was demonstrated manually: **browser player selection → server-side PIN verification → signed HTTP-only session → canonical player ID → server-derived namespace → Walrus mainnet recall**.
+- **Aaron:** browser login PASS; active player `Aaron`; canonical ID `player_aaron`; resolved namespace `whoamai:player_aaron`; manual recall PASS. It returned exactly two Aaron connectivity-test artifacts:
+  - `[WHOAMAI_CONNECTIVITY_TEST] Aaron connectivity marker 1789761976516-b3n3fmmb6eo` — blob `NHG-IyhVZKZuOJnQNQRwPw9PU2msVdwsLu2kdcaetEo`.
+  - `[WHOAMAI_CONNECTIVITY_TEST] Aaron connectivity marker 1789760850617-7hp3hyn4d1e` — blob `K9PO0EcxVvF_qgGDH8-x4brqawFWHNpuUzNkOKUDmrw`.
+- **Leo:** switch-player/logout PASS; browser login PASS; active player `Leo`; canonical ID `player_leo`; resolved namespace `whoamai:player_leo`; manual recall PASS. It returned exactly one Leo connectivity-test artifact: `[WHOAMAI_CONNECTIVITY_TEST] Leo connectivity marker 1789762028780-broyn2vlzq4` — blob `vZBMLOyMTYI4g-u0BDxp2FHLqlDqLzI0SnC53cit1QU`.
+- **Browser-observed namespace isolation:** PASS. No Aaron connectivity marker appeared in Leo's recall, confirming the browser session mapped to the correct server-derived namespace.
+- Incorrect-PIN rejection PASS; authenticated session persistence across refresh PASS; Memory ON/OFF persistence across refresh PASS; gameplay remained unchanged by Memory ON/OFF PASS.
+- All returned `WHOAMAI_CONNECTIVITY_TEST` records are connectivity-test artifacts. They do **not** count toward the Session 8 requirement of ten meaningful memories per user.
+- **Phase 3B complete.** No new Walrus writes were made during this browser validation.
